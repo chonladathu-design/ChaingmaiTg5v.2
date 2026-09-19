@@ -241,12 +241,16 @@
 
         .row-slider.dragging .card {
             transition: none;
-            pointer-events: none;
             user-select: none;
         }
 
-        .row-slider.dragging::-webkit-scrollbar {
-            display: none;
+        .row-slider.dragging {
+            cursor: grabbing;
+        }
+
+        .row-slider img {
+            -webkit-user-drag: none;
+            user-select: none;
         }
 
         /* wrap + arrow buttons */
@@ -1221,17 +1225,35 @@
 
             selectConfirm.addEventListener('click', function () {
                 if (selectedItems.length === 0) return;
-                const names = selectedItems.map(function (s) { return s.item.name; });
-                const url = 'https://www.google.com/maps/dir/?api=1&origin=' +
-                    encodeURIComponent(names[0] + ', Chiang Mai, Thailand') +
-                    '&destination=' +
-                    encodeURIComponent(names[names.length - 1] + ', Chiang Mai, Thailand') +
-                    (names.length > 2
-                        ? '&waypoints=' + names.slice(1, -1).map(function (n) {
-                            return encodeURIComponent(n + ', Chiang Mai, Thailand');
-                        }).join('|')
-                        : '');
-                window.open(url, '_blank', 'noopener');
+
+                const names = selectedItems.map(function (s) {
+                    return s.item.name + ', Chiang Mai, Thailand';
+                });
+
+                let url;
+                if (names.length === 1) {
+                    url = selectedItems[0].item.link ||
+                        'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(names[0]);
+                } else {
+                    url = 'https://www.google.com/maps/dir/?api=1' +
+                        '&origin=' + encodeURIComponent(names[0]) +
+                        '&destination=' + encodeURIComponent(names[names.length - 1]) +
+                        (names.length > 2
+                            ? '&waypoints=' + names.slice(1, -1).map(function (n) {
+                                return encodeURIComponent(n);
+                            }).join('%7C')
+                            : '') +
+                        '&travelmode=driving';
+                }
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
                 showToast('สร้างเส้นทาง ' + names.length + ' สถานที่ เปิดใน Google Maps แล้ว');
             });
         });
