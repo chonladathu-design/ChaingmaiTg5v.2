@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เชียงใหม่ | Netflix Style</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;700;800;900&family=Baloo+2:wght@700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(180deg, #2f6b42 0%, #1f4a2c 45%, #122b1a 100%);
+            color: #fff;
+            font-family: 'Prompt', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            padding-bottom: 0;
+        }
+
+        body.has-select {
+            padding-bottom: 92px;
+        }
+
+        @media (max-width: 768px) {
+            body.has-select {
+                padding-bottom: 150px;
+            }
+        }
+
+        /* Banner band (top of page) */
+        .banner {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #1f4a2c 0%, #122b1a 100%);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Topic bar (categories) */
+        .topic-bar {
+            position: relative;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 40px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .topic-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .topic {
+            flex-shrink: 0;
+            padding: 9px 20px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #eaf7ed;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.2s;
+            white-space: nowrap;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .topic:hover {
+            background: rgba(255,255,255,0.28);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .topic.active {
+            background: linear-gradient(135deg, #fca311, #e63946);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(230,57,70,0.4);
+        }
+
+        /* Content Rows */
+        .content-section {
+            position: relative;
+            z-index: 3;
+        }
+
+        .content-row {
+            margin-bottom: 40px;
+            scroll-margin-top: 20px;
+        }
+
+        .row-title {
+            font-size: 21px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: #eaf7ed;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding-left: 40px;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .row-title:hover {
+            color: #fca311;
+        }
+
+        .row-slider {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 0 40px 10px;
+            scrollbar-width: none;
+        }
+
+        .row-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .card {
+            min-width: 260px;
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            flex-shrink: 0;
+            text-decoration: none;
+            display: block;
+            background: #1f4a2c;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 34px rgba(0,0,0,0.45);
+            z-index: 10;
+            border-color: rgba(252,163,17,0.5);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 12px;
+            background: linear-gradient(transparent, rgba(20,20,20,0.95));
+        }
+
+        .card-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .card-category {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .card-count {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 3;
+            background: rgba(0,0,0,0.65);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.25);
+            pointer-events: none;
+        }
+
+        .card:hover .card-count {
+            background: #e63946;
+        }
+
+        /* Selection checkmark button */
+        .card-select {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 6;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.6);
+            background: rgba(0,0,0,0.45);
+            color: #fff;
+            font-size: 16px;
+            line-height: 26px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-select:hover {
+            background: rgba(252,163,17,0.6);
+            border-color: #fca311;
+        }
+
+        .card-select.active {
+            background: linear-gradient(135deg, #fca311, #e63946);
+            border-color: #fff;
+            box-shadow: 0 2px 8px rgba(230,57,70,0.5);
+        }
+
+        .row-slider.dragging .card {
+            transition: none;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .row-slider.dragging::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* wrap + arrow buttons */
+        .row-slider-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .row-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 12;
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(18,43,26,0.85);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.25);
+            transition: background 0.2s, transform 0.2s, opacity 0.2s;
+            opacity: 0;
+        }
+
+        .row-slider-wrap:hover .row-arrow {
+            opacity: 1;
+        }
+
+        .row-arrow:hover {
+            background: linear-gradient(135deg, #fca311, #e63946);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .row-prev { left: 6px; }
+        .row-next { right: 6px; }
+
+        @media (hover: none) {
+            .row-arrow {
+                opacity: 0.9;
+                background: rgba(18,43,26,0.9);
+            }
+        }
+
+        .card.select-highlight {
+            outline: 3px solid #fca311;
+            outline-offset: -1px;
+        }
+
+        /* Sticky selection bar */
+        .select-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1500;
+            background: linear-gradient(180deg, rgba(22,42,32,0.0), rgba(22,42,32,0.97) 18%);
+            padding: 28px 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            pointer-events: none;
+        }
+
+        .select-bar.visible {
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .select-bar-inner {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            max-width: 800px;
+            width: 100%;
+            background: rgba(30,50,40,0.95);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 12px 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+        }
+
+        .select-info {
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+            min-width: 60px;
+        }
+
+        .select-info strong {
+            color: #fca311;
+            font-size: 18px;
+        }
+
+        .select-chips {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding: 4px 0;
+        }
+
+        .select-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .select-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(252,163,17,0.15);
+            border: 1px solid rgba(252,163,17,0.4);
+            color: #f5d9a0;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 999px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .select-chip:hover {
+            background: rgba(230,57,70,0.3);
+            border-color: rgba(230,57,70,0.6);
+        }
+
+        .select-chip-num {
+            background: #fca311;
+            color: #1a1a1a;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .select-clear {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #aaa;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 7px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .select-clear:hover {
+            background: rgba(230,57,70,0.2);
+            color: #e63946;
+            border-color: rgba(230,57,70,0.4);
+        }
+
+        .select-confirm {
+            background: linear-gradient(135deg, #fca311, #e63946);
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 10px 24px;
+            border-radius: 999px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(230,57,70,0.4);
+            transition: all 0.2s;
+        }
+
+        .select-confirm:hover {
+            transform: scale(1.04);
+            box-shadow: 0 6px 20px rgba(230,57,70,0.55);
+        }
+
+        .select-confirm:disabled {
+            opacity: 0.4;
+            cursor: default;
+            transform: none;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(30,50,40,0.95);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            z-index: 2500;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Lightbox / one-page gallery viewer */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0,0,0,0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .lightbox.open {
+            display: flex;
+        }
+
+        .lightbox-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 95vw;
+            max-height: 92vh;
+            width: 100%;
+        }
+
+        .lightbox-main {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
+
+        .lightbox-main img {
+            max-width: 100%;
+            max-height: 68vh;
+            border-radius: 12px;
+            box-shadow: 0 12px 60px rgba(0,0,0,0.6);
+            object-fit: contain;
+        }
+
+        .lb-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            z-index: 5;
+        }
+
+        .lb-nav:hover {
+            background: #e63946;
+        }
+
+        .lb-prev { left: -8px; }
+        .lb-next { right: -8px; }
+
+        .lb-close {
+            position: absolute;
+            bottom: calc(100% - 8px);
+            right: 0;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 34px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .lb-close:hover { color: #e63946; }
+
+        .lb-info {
+            margin-top: 14px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .lb-name {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .lb-cat {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .lb-map {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 22px;
+            background: linear-gradient(135deg, #fca311, #e63946);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            border-radius: 999px;
+            box-shadow: 0 6px 18px rgba(230,57,70,0.4);
+        }
+
+        .lb-map:hover { opacity: 0.85; }
+
+        .lb-thumbs {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            overflow-x: auto;
+            max-width: 100%;
+            padding: 4px 0;
+            scrollbar-width: thin;
+        }
+
+        .lb-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            opacity: 0.7;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .lb-thumb.active { border-color: #fca311; opacity: 1; }
+
+        .lb-counter {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 6px;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 40px 40px 60px;
+            color: #808080;
+            font-size: 13px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            max-width: 900px;
+            margin-bottom: 30px;
+        }
+
+        .footer-links a, .footer p {
+            color: #bcd9c4;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .banner {
+                height: 140px;
+            }
+
+            .topic-bar {
+                position: sticky;
+                top: 0;
+                z-index: 1200;
+                padding: 10px 12px;
+                margin-bottom: 16px;
+                gap: 8px;
+                background: rgba(18,43,26,0.92);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+
+            .topic {
+                padding: 7px 14px;
+                font-size: 13px;
+            }
+
+            .row-title {
+                font-size: 18px;
+                padding-left: 14px;
+                margin-bottom: 10px;
+            }
+
+            .content-row {
+                scroll-margin-top: 60px;
+            }
+
+            .row-slider {
+                padding: 0 12px 10px;
+                gap: 8px;
+            }
+
+            .card {
+                min-width: 170px;
+            }
+
+            .card-image {
+                height: 110px;
+            }
+
+            .card-name {
+                font-size: 12px;
+            }
+
+            .row-arrow {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+                opacity: 0.9;
+                background: rgba(18,43,26,0.9);
+            }
+
+            .row-prev { left: 4px; }
+            .row-next { right: 4px; }
+
+            .card-select {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+
+            .card-count {
+                font-size: 10px;
+            }
+
+            .select-bar {
+                padding: 16px 10px 10px;
+            }
+
+            .select-bar-inner {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 10px 12px;
+                border-radius: 14px;
+                max-height: 180px;
+                overflow-y: auto;
+            }
+
+            .select-info {
+                font-size: 13px;
+                min-width: 0;
+                order: 1;
+            }
+
+            .select-chips {
+                order: 3;
+                flex: 0 0 100%;
+                min-width: 100%;
+            }
+
+            .select-clear {
+                order: 2;
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .select-confirm {
+                order: 2;
+                font-size: 13px;
+                padding: 8px 18px;
+                margin-left: auto;
+            }
+
+            .lightbox {
+                padding: 12px;
+            }
+
+            .lightbox-content {
+                max-height: 94vh;
+            }
+
+            .lightbox-main img {
+                max-height: 52vh;
+            }
+
+            .lb-nav {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+
+            .lb-prev { left: 0; }
+            .lb-next { right: 0; }
+
+            .lb-close {
+                font-size: 28px;
+            }
+
+            .lb-name {
+                font-size: 17px;
+            }
+
+            .lb-thumb {
+                width: 46px;
+                height: 46px;
+            }
+
+            .lb-map {
+                margin-top: 10px;
+                padding: 8px 18px;
+                font-size: 13px;
+            }
+
+            .toast {
+                bottom: 84px;
+                left: 8px;
+                right: 8px;
+                transform: translateX(0) translateY(20px);
+                text-align: center;
+            }
+
+            .toast.show {
+                transform: translateX(0) translateY(0);
+            }
+
+            .footer {
+                padding: 30px 16px 40px;
+            }
+
+            .footer-links {
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+
+            .footer-links a, .footer p {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .banner {
+                height: 120px;
+            }
+
+            .topic {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .card {
+                min-width: 150px;
+            }
+
+            .card-image {
+                height: 100px;
+            }
+
+            .select-info {
+                font-size: 12px;
+            }
+
+            .select-chip {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            .select-confirm {
+                font-size: 12px;
+                padding: 8px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Banner band -->
+    <div class="banner">
+        <img src="Banner Web.png" alt="Chiang Mai Banner">
+    </div>
+
+    <!-- Topic bar: categories from Excel -->
+    <div class="topic-bar" id="topic-bar"></div>
+
+    <!-- Content rows generated from Excel data -->
+    <section class="content-section" id="content"></section>
+
+    <!-- Lightbox: one-page gallery viewer -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="แกลเลอรีรูปภาพ">
+        <div class="lightbox-content">
+            <div class="lightbox-main">
+                <button class="lb-close" id="lb-close" aria-label="ปิด">&times;</button>
+                <button class="lb-nav lb-prev" id="lb-prev" aria-label="รูปก่อนหน้า">&#10094;</button>
+                <img id="lb-img" src="" alt="">
+                <button class="lb-nav lb-next" id="lb-next" aria-label="รูปถัดไป">&#10095;</button>
+            </div>
+            <div class="lb-info">
+                <div class="lb-name" id="lb-name"></div>
+                <div class="lb-cat" id="lb-cat"></div>
+                <a class="lb-map" id="lb-map" href="#" target="_blank" rel="noopener">&#128205; เปิดแผนที่ Google Maps</a>
+                <div class="lb-thumbs" id="lb-thumbs"></div>
+                <div class="lb-counter" id="lb-counter"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selection bar -->
+    <div class="select-bar" id="select-bar">
+        <div class="select-bar-inner">
+            <div class="select-info">เลือก <strong id="select-count">0</strong> / 5</div>
+            <div class="select-chips" id="select-chips"></div>
+            <button class="select-clear" id="select-clear">ล้างทั้งหมด</button>
+            <button class="select-confirm" id="select-confirm" disabled>ดูแผนที่ &#128506;</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#">ติดต่อเรา</a>
+            <a href="#">ศูนย์ช่วยเหลือ</a>
+        </div>
+        <p>&copy; 2026 Chiang Mai Guide. All rights reserved for Our Gang TG5!</p>
+    </footer>
+
+    <script src="data.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            const data = window.CM_DATA || [];
+            const topicBar = document.getElementById('topic-bar');
+            const content = document.getElementById('content');
+
+            // Build topic pills from Excel categories
+            data.forEach(function (cat, idx) {
+                const pill = document.createElement('span');
+                pill.className = 'topic' + (idx === 0 ? ' active' : '');
+                pill.textContent = cat.title;
+                pill.addEventListener('click', function () {
+                    document.querySelectorAll('.topic').forEach(function (t) { t.classList.remove('active'); });
+                    pill.classList.add('active');
+                    const row = document.getElementById('row-' + idx);
+                    if (row) row.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                topicBar.appendChild(pill);
+            });
+
+            // Build content rows
+            data.forEach(function (cat, idx) {
+                const row = document.createElement('div');
+                row.className = 'content-row';
+                row.id = 'row-' + idx;
+
+                const title = document.createElement('h2');
+                title.className = 'row-title';
+                title.textContent = cat.title + ' (' + cat.items.length + ')';
+                row.appendChild(title);
+
+                const slider = document.createElement('div');
+                slider.className = 'row-slider';
+
+                cat.items.forEach(function (item) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.title = item.name;
+
+                    const selBtn = document.createElement('button');
+                    selBtn.className = 'card-select';
+                    selBtn.setAttribute('aria-label', 'เลือกร้าน ' + item.name);
+                    selBtn.innerHTML = '&#10003;';
+                    selBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        toggleSelect(item, card);
+                    });
+                    card.appendChild(selBtn);
+
+                    if (item.imgs && item.imgs.length > 1) {
+                        const count = document.createElement('div');
+                        count.className = 'card-count';
+                        count.textContent = 'ดู ' + item.imgs.length + ' รูป';
+                        card.appendChild(count);
+                    }
+
+                    const img = document.createElement('img');
+                    img.className = 'card-image';
+                    img.loading = 'lazy';
+                    img.alt = item.name;
+                    img.src = (cat.dir ? encodeURI(cat.dir + '/') : '') + item.img;
+                    img.onerror = function () {
+                        this.style.background = '#333';
+                        this.style.objectFit = 'none';
+                    };
+
+                    const overlay = document.createElement('div');
+                    overlay.className = 'card-overlay';
+                    const name = document.createElement('div');
+                    name.className = 'card-name';
+                    name.textContent = item.name;
+                    const catLabel = document.createElement('div');
+                    catLabel.className = 'card-category';
+                    catLabel.textContent = cat.title;
+                    overlay.appendChild(name);
+                    overlay.appendChild(catLabel);
+
+                    card.appendChild(img);
+                    card.appendChild(overlay);
+                    card.addEventListener('click', function () {
+                        openLightbox(item, cat);
+                    });
+                    slider.appendChild(card);
+                });
+
+                // scroll arrows + wrapper
+                const wrap = document.createElement('div');
+                wrap.className = 'row-slider-wrap';
+
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'row-arrow row-prev';
+                prevBtn.setAttribute('aria-label', 'เลื่อนซ้าย');
+                prevBtn.innerHTML = '&#10094;';
+                prevBtn.addEventListener('click', function () {
+                    slider.scrollBy({ left: -slider.clientWidth * 0.8, behavior: 'smooth' });
+                });
+
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'row-arrow row-next';
+                nextBtn.setAttribute('aria-label', 'เลื่อนขวา');
+                nextBtn.innerHTML = '&#10095;';
+                nextBtn.addEventListener('click', function () {
+                    slider.scrollBy({ left: slider.clientWidth * 0.8, behavior: 'smooth' });
+                });
+
+                wrap.appendChild(prevBtn);
+                wrap.appendChild(slider);
+                wrap.appendChild(nextBtn);
+                row.appendChild(wrap);
+                content.appendChild(row);
+            });
+
+            // drag-to-scroll + horizontal wheel for every slider
+            document.querySelectorAll('.row-slider').forEach(function (slider) {
+                let isDown = false;
+                let startX = 0;
+                let startScroll = 0;
+                let moved = 0;
+
+                slider.addEventListener('mousedown', function (e) {
+                    if (e.button !== 0) return;
+                    isDown = true;
+                    moved = 0;
+                    startX = e.clientX;
+                    startScroll = slider.scrollLeft;
+                    slider.classList.add('dragging');
+                    slider.style.cursor = 'grabbing';
+                });
+
+                slider.addEventListener('mousemove', function (e) {
+                    if (!isDown) return;
+                    const dx = e.clientX - startX;
+                    moved = Math.max(moved, Math.abs(dx));
+                    slider.scrollLeft = startScroll - dx;
+                });
+
+                function stopDrag() {
+                    if (!isDown) return;
+                    isDown = false;
+                    slider.classList.remove('dragging');
+                    slider.style.cursor = '';
+                    if (moved > 8) {
+                        // suppress click opening lightbox after a drag
+                        slider.addEventListener('click', function once(e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            slider.removeEventListener('click', once);
+                        }, { capture: true });
+                    }
+                }
+
+                slider.addEventListener('mouseup', stopDrag);
+                slider.addEventListener('mouseleave', stopDrag);
+
+                slider.addEventListener('wheel', function (e) {
+                    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                        e.preventDefault();
+                        slider.scrollLeft += e.deltaY;
+                    }
+                }, { passive: false });
+            });
+
+            // ---- Lightbox: one-page gallery viewer ----
+            let lbItems = [];
+            let lbIndex = 0;
+
+            const lb = document.getElementById('lightbox');
+            const lbImg = document.getElementById('lb-img');
+            const lbName = document.getElementById('lb-name');
+            const lbCat = document.getElementById('lb-cat');
+            const lbMap = document.getElementById('lb-map');
+            const lbThumbs = document.getElementById('lb-thumbs');
+            const lbCounter = document.getElementById('lb-counter');
+
+            function lbSrc(i) {
+                return (lbItems[i].dir ? encodeURI(lbItems[i].dir + '/') : '') + lbItems[i].file;
+            }
+
+            function renderLightbox() {
+                lbImg.src = lbSrc(lbIndex);
+                lbName.textContent = lbItems[0].name;
+                lbCat.textContent = lbItems[0].catTitle;
+                lbMap.href = lbItems[0].link || '#';
+                lbMap.style.display = lbItems[0].link ? '' : 'none';
+                lbCounter.textContent = (lbIndex + 1) + ' / ' + lbItems.length;
+
+                lbThumbs.innerHTML = '';
+                lbItems.forEach(function (it, i) {
+                    const t = document.createElement('img');
+                    t.className = 'lb-thumb' + (i === lbIndex ? ' active' : '');
+                    t.src = lbSrc(i);
+                    t.alt = it.name;
+                    t.addEventListener('click', function () {
+                        lbIndex = i;
+                        renderLightbox();
+                    });
+                    lbThumbs.appendChild(t);
+                });
+            }
+
+            function openLightbox(item, cat) {
+                lbItems = (item.imgs && item.imgs.length ? item.imgs : [item.img]).map(function (f) {
+                    return { file: f, name: item.name, link: item.link, dir: cat.dir, catTitle: cat.title };
+                });
+                lbIndex = 0;
+                renderLightbox();
+                lb.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLightbox() {
+                lb.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+
+            document.getElementById('lb-close').addEventListener('click', closeLightbox);
+            lb.addEventListener('click', function (e) { if (e.target === lb) closeLightbox(); });
+
+            document.getElementById('lb-prev').addEventListener('click', function () {
+                lbIndex = (lbIndex - 1 + lbItems.length) % lbItems.length;
+                renderLightbox();
+            });
+            document.getElementById('lb-next').addEventListener('click', function () {
+                lbIndex = (lbIndex + 1) % lbItems.length;
+                renderLightbox();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (!lb.classList.contains('open')) return;
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') { lbIndex = (lbIndex - 1 + lbItems.length) % lbItems.length; renderLightbox(); }
+                if (e.key === 'ArrowRight') { lbIndex = (lbIndex + 1) % lbItems.length; renderLightbox(); }
+            });
+
+            // ---- Place selection (max 5, across categories) ----
+            const MAX_SELECT = 5;
+            const selectedItems = [];
+            const cardMap = new Map();
+
+            const selectBar = document.getElementById('select-bar');
+            const selectCount = document.getElementById('select-count');
+            const selectChips = document.getElementById('select-chips');
+            const selectClear = document.getElementById('select-clear');
+            const selectConfirm = document.getElementById('select-confirm');
+            const toastEl = document.getElementById('toast');
+
+            let toastTimer = null;
+            function showToast(msg, isErr) {
+                toastEl.textContent = msg;
+                toastEl.style.background = isErr ? 'rgba(120,40,40,0.95)' : 'rgba(30,50,40,0.95)';
+                toastEl.classList.add('show');
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2400);
+            }
+
+            function toggleSelect(item, card) {
+                const idx = selectedItems.findIndex(function (s) { return s.item === item; });
+                if (idx >= 0) {
+                    selectedItems.splice(idx, 1);
+                    card.classList.remove('select-highlight');
+                    const btn = card.querySelector('.card-select');
+                    if (btn) btn.classList.remove('active');
+                    renderSelected();
+                    return;
+                }
+                if (selectedItems.length >= MAX_SELECT) {
+                    showToast('เลือกร้านได้สูงสุด ' + MAX_SELECT + ' ร้านต่อ 1 ทริป', true);
+                    return;
+                }
+                selectedItems.push({ item: item, card: card });
+                card.classList.add('select-highlight');
+                const btn = card.querySelector('.card-select');
+                if (btn) btn.classList.add('active');
+                renderSelected();
+            }
+
+            function renderSelected() {
+                const n = selectedItems.length;
+                selectCount.textContent = n;
+                selectConfirm.disabled = n === 0;
+                selectBar.classList.toggle('visible', n > 0);
+                document.body.classList.toggle('has-select', n > 0);
+
+                selectChips.innerHTML = '';
+                selectedItems.forEach(function (s, idx) {
+                    const slot = idx + 1;
+                    const chip = document.createElement('span');
+                    chip.className = 'select-chip';
+                    chip.textContent = s.item.name;
+                    chip.title = 'จุดที่ ' + slot + ' ของทริป';
+                    const num = document.createElement('span');
+                    num.className = 'select-chip-num';
+                    num.textContent = slot;
+                    chip.prepend(num);
+                    chip.addEventListener('click', function () {
+                        toggleSelect(s.item, s.card);
+                    });
+                    selectChips.appendChild(chip);
+                });
+            }
+
+            selectClear.addEventListener('click', function () {
+                selectedItems.forEach(function (s) {
+                    s.card.classList.remove('select-highlight');
+                    const btn = s.card.querySelector('.card-select');
+                    if (btn) btn.classList.remove('active');
+                });
+                selectedItems.length = 0;
+                renderSelected();
+            });
+
+            selectConfirm.addEventListener('click', function () {
+                if (selectedItems.length === 0) return;
+                const names = selectedItems.map(function (s) { return s.item.name; });
+                const url = 'https://www.google.com/maps/dir/?api=1&origin=' +
+                    encodeURIComponent(names[0] + ', Chiang Mai, Thailand') +
+                    '&destination=' +
+                    encodeURIComponent(names[names.length - 1] + ', Chiang Mai, Thailand') +
+                    (names.length > 2
+                        ? '&waypoints=' + names.slice(1, -1).map(function (n) {
+                            return encodeURIComponent(n + ', Chiang Mai, Thailand');
+                        }).join('|')
+                        : '');
+                window.open(url, '_blank', 'noopener');
+                showToast('สร้างเส้นทาง ' + names.length + ' สถานที่ เปิดใน Google Maps แล้ว');
+            });
+        });
+    </script>
+</body>
+</html>
